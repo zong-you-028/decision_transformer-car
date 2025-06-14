@@ -283,3 +283,49 @@ class HighwayDataCollector:
                 return 2
         return 0
 
+
+def load_or_collect_trajectories(
+    file_path: str,
+    collector: HighwayDataCollector | None = None,
+    n_aggressive: int = 20,
+    n_cautious: int = 20,
+    n_normal: int = 20,
+):
+    """Load trajectories from ``file_path`` or collect and save new ones.
+
+    Parameters
+    ----------
+    file_path : str
+        Location of the dataset pickle file.
+    collector : HighwayDataCollector, optional
+        Existing collector to use for gathering trajectories.
+    n_aggressive : int
+        Number of aggressive trajectories to collect if missing.
+    n_cautious : int
+        Number of cautious trajectories to collect if missing.
+    n_normal : int
+        Number of normal trajectories to collect if missing.
+
+    Returns
+    -------
+    list[dict]
+        List of collected or loaded trajectory dictionaries.
+    """
+
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            return pickle.load(f)
+
+    if collector is None:
+        collector = HighwayDataCollector()
+
+    aggressive = collector.collect_aggressive_trajectories(n_aggressive)
+    cautious = collector.collect_cautious_trajectories(n_cautious)
+    normal = collector.collect_expert_trajectories(n_normal)
+    trajectories = aggressive + cautious + normal
+
+    with open(file_path, "wb") as f:
+        pickle.dump(trajectories, f)
+
+    return trajectories
+
