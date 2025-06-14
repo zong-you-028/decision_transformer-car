@@ -19,10 +19,6 @@ The data collector now supports three driving styles:
 After training, an animation of the training environment is saved as
 `training_animation.mp4`.
 
-Collected trajectories are stored in `highway_trajectories.pkl`. If this
-file already exists, the main script will load it instead of collecting
-new data, allowing you to reuse previously gathered datasets.
-
 Run the training pipeline with:
 
 ```bash
