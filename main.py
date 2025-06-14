@@ -29,10 +29,11 @@ def main():
     print("Collecting trajectories...")
     collector = HighwayDataCollector()
     
-    # Collect mixed quality data
-    random_trajs = collector.collect_random_trajectories(50)
-    expert_trajs = collector.collect_expert_trajectories(30)
-    all_trajectories = random_trajs + expert_trajs
+    # Collect trajectories from three driving styles
+    aggressive_trajs = collector.collect_aggressive_trajectories(20)
+    cautious_trajs = collector.collect_cautious_trajectories(20)
+    normal_trajs = collector.collect_expert_trajectories(20)
+    all_trajectories = aggressive_trajs + cautious_trajs + normal_trajs
     
     # Save trajectories
     with open('highway_trajectories.pkl', 'wb') as f:
@@ -58,7 +59,13 @@ def main():
     # 4. Train model
     print("Training model...")
     trainer = DecisionTransformerTrainer(model)
-    train_losses = trainer.train(dataset, num_epochs=100, batch_size=32)
+    train_losses = trainer.train(
+        dataset,
+        num_epochs=100,
+        batch_size=32,
+        record_animation=True,
+        animation_file="training_animation.mp4",
+    )
     
     # Save model
     torch.save(model.state_dict(), 'decision_transformer_highway.pth')
