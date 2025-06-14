@@ -58,8 +58,7 @@ class HighwayDataset(Dataset):
             "actions": torch.from_numpy(padded_actions),
             "returns_to_go": torch.from_numpy(padded_returns),
             "timesteps": torch.from_numpy(padded_timesteps),
-            "attention_mask": torch.from_numpy(attention_mask),
-            "style": traj.get("style", "normal")
+            "attention_mask": torch.from_numpy(attention_mask)
         }
 
     def _calculate_returns_to_go(self, rewards):
@@ -154,69 +153,6 @@ class HighwayDataCollector:
                 print(f"Collected {i}/{num_trajectories} expert trajectories")
         
         return trajectories
-
-    # === New methods for different driving styles ===
-    def collect_aggressive_trajectories(self, num_trajectories: int = 100):
-        """Collect trajectories using an aggressive driving policy"""
-        trajectories = []
-
-        for i in range(num_trajectories):
-            obs, info = self.env.reset()
-            trajectory = {
-                'observations': [],
-                'actions': [],
-                'rewards': [],
-                'dones': [],
-                'style': 'aggressive'
-            }
-
-            done = truncated = False
-            while not (done or truncated):
-                action = self._aggressive_policy(obs)
-                trajectory['observations'].append(obs)
-                trajectory['actions'].append(action)
-
-                obs, reward, done, truncated, info = self.env.step(action)
-                trajectory['rewards'].append(reward)
-                trajectory['dones'].append(done)
-
-            trajectories.append(trajectory)
-
-            if i % 50 == 0:
-                print(f"Collected {i}/{num_trajectories} aggressive trajectories")
-
-        return trajectories
-
-    def collect_cautious_trajectories(self, num_trajectories: int = 100):
-        """Collect trajectories using a cautious driving policy"""
-        trajectories = []
-
-        for i in range(num_trajectories):
-            obs, info = self.env.reset()
-            trajectory = {
-                'observations': [],
-                'actions': [],
-                'rewards': [],
-                'dones': [],
-                'style': 'cautious'
-            }
-
-            done = truncated = False
-            while not (done or truncated):
-                action = self._cautious_policy(obs)
-                trajectory['observations'].append(obs)
-                trajectory['actions'].append(action)
-
-                obs, reward, done, truncated, info = self.env.step(action)
-                trajectory['rewards'].append(reward)
-                trajectory['dones'].append(done)
-
-            trajectories.append(trajectory)
-
-            if i % 50 == 0:
-                print(f"Collected {i}/{num_trajectories} cautious trajectories")
-
-        return trajectories
     
     def _heuristic_policy(self, obs):
         """Simple heuristic policy for Highway-Env"""
@@ -252,34 +188,4 @@ class HighwayDataCollector:
                         return 2  # SLOWER
             
             return 0  # IDLE (maintain current speed)
-
-    def _aggressive_policy(self, obs):
-        """Aggressive driving policy"""
-        ego = obs[0]
-        x, y, vx, vy = ego[1], ego[2], ego[3], ego[4]
-        speed = np.sqrt(vx**2 + vy**2)
-
-        if speed < 30:
-            return 1  # always try to accelerate
-        # frequently change to left lane if possible
-        for i in range(1, len(obs)):
-            if obs[i][0] and obs[i][1] > x and abs(obs[i][2]-y) < 2 and obs[i][1]-x < 8:
-                if y < 3:
-                    return 3  # LANE_LEFT
-                else:
-                    return 1
-        return 0
-
-    def _cautious_policy(self, obs):
-        """Cautious driving policy"""
-        ego = obs[0]
-        x, y, vx, vy = ego[1], ego[2], ego[3], ego[4]
-        speed = np.sqrt(vx**2 + vy**2)
-
-        if speed > 20:
-            return 2  # SLOWER
-        for i in range(1, len(obs)):
-            if obs[i][0] and obs[i][1] > x and abs(obs[i][2]-y) < 2 and obs[i][1]-x < 15:
-                return 2
-        return 0
 
