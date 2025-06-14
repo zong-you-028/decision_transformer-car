@@ -198,9 +198,14 @@ class DecisionTransformerTrainer:
         results = evaluator.evaluate(num_episodes=num_episodes, target_return=25)
         return results
     
-    def train(self, dataset, num_epochs=100, batch_size=64):
-        """Training method with environment visualization"""
+    def train(self, dataset, num_epochs=100, batch_size=64,
+              record_animation: bool = False,
+              animation_file: str = "training.mp4"):
+        """Training method with optional animation recording"""
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+        if record_animation:
+            self.record_frames = []
         
         # Setup basic training plots
         self.setup_training_plots()
@@ -234,6 +239,8 @@ class DecisionTransformerTrainer:
                 # 環境 step & render
                 self.vis_obs, _, done, truncated, _ = self.vis_env.step(act)
                 frame = self.vis_env.render()
+                if record_animation:
+                    self.record_frames.append(frame)
 
                 if done or truncated:           # episode 結束就重新開始
                     self.vis_obs, _ = self.vis_env.reset()
@@ -298,4 +305,30 @@ class DecisionTransformerTrainer:
                 self.axes[0, 1].grid(True)
                 plt.pause(0.1)
         
+        if record_animation:
+            self.save_training_animation(animation_file)
+
         return train_losses
+
+    def save_training_animation(self, filename: str):
+        """Save recorded training frames as an MP4 file"""
+        if not hasattr(self, "record_frames") or not self.record_frames:
+            return
+
+        print(f"Saving training animation to {filename}...")
+        fig = plt.figure(figsize=(8, 6))
+        plt.axis('off')
+        im = plt.imshow(self.record_frames[0])
+
+        def update(i):
+            im.set_data(self.record_frames[i])
+            return im,
+
+        anim = animation.FuncAnimation(
+            fig, update, frames=len(self.record_frames), interval=200, blit=False
+        )
+
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=5, metadata=dict(artist='Decision Transformer'), bitrate=1800)
+        anim.save(filename, writer=writer)
+        plt.close(fig)

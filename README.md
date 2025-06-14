@@ -10,6 +10,15 @@ The original single `CAR.py` script has been split into smaller modules located 
 - `evaluator.py` – evaluation helpers
 - `main.py` – entry point that ties everything together
 
+The data collector now supports three driving styles:
+
+- **aggressive** – accelerates and changes lanes frequently
+- **cautious** – keeps lower speeds and avoids risky moves
+- **normal** – a balanced heuristic
+
+After training, an animation of the training environment is saved as
+`training_animation.mp4`.
+
 Run the training pipeline with:
 
 ```bash
