@@ -296,7 +296,7 @@ class DecisionTransformerTrainer:
         self.eval_results = []
         
         # Setup for visualization
-        plt.style.use('seaborn-v0_8')
+        plt.style.use('seaborn')
         self.fig = None
         self.axes = None
         
@@ -910,18 +910,24 @@ class HighwayEvaluator:
 def main():
     """Main training and evaluation pipeline"""
     
-    # 1. Collect data
-    print("Collecting trajectories...")
-    collector = HighwayDataCollector()
-    
-    # Collect mixed quality data
-    random_trajs = collector.collect_random_trajectories(50)
-    expert_trajs = collector.collect_expert_trajectories(30)
-    all_trajectories = random_trajs + expert_trajs
-    
-    # Save trajectories
-    with open('highway_trajectories.pkl', 'wb') as f:
-        pickle.dump(all_trajectories, f)
+    # 1. Load existing data or collect new trajectories
+    data_file = 'highway_trajectories.pkl'
+
+    if os.path.exists(data_file):
+        print(f"Loading trajectories from {data_file}...")
+        with open(data_file, 'rb') as f:
+            all_trajectories = pickle.load(f)
+    else:
+        print("Collecting trajectories...")
+        collector = HighwayDataCollector()
+
+        # Collect mixed quality data
+        random_trajs = collector.collect_random_trajectories(50)
+        expert_trajs = collector.collect_expert_trajectories(30)
+        all_trajectories = random_trajs + expert_trajs
+
+        with open(data_file, 'wb') as f:
+            pickle.dump(all_trajectories, f)
     
     # 2. Create dataset
     print("Creating dataset...")
