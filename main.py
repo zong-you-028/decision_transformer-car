@@ -18,29 +18,17 @@ from PIL import Image
 import seaborn as sns
 
 from decision_transformer.model import DecisionTransformer
-from decision_transformer.data import HighwayDataset, HighwayDataCollector
+from decision_transformer.data import (
+    HighwayDataset,
+    load_or_collect_trajectories,
+)
 from decision_transformer.trainer import DecisionTransformerTrainer
 from decision_transformer.evaluator import HighwayEvaluator
 
 def main():
     """Main training and evaluation pipeline"""
     
-    # 1. Collect data
-    print("Collecting trajectories...")
-    collector = HighwayDataCollector()
-    
-    # Collect trajectories from three driving styles
-    aggressive_trajs = collector.collect_aggressive_trajectories(20)
-    cautious_trajs = collector.collect_cautious_trajectories(20)
-    normal_trajs = collector.collect_expert_trajectories(20)
-    all_trajectories = aggressive_trajs + cautious_trajs + normal_trajs
-    
-    # Save trajectories
-    with open('highway_trajectories.pkl', 'wb') as f:
-        pickle.dump(all_trajectories, f)
-    
-    # 2. Create dataset
-    print("Creating dataset...")
+    all_trajectories = load_or_collect_trajectories(data_file)
     dataset = HighwayDataset(all_trajectories, max_len=20)
     
     # 3. Initialize model
