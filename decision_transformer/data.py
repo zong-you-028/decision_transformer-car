@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.patches import Rectangle
 import pickle
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict,Optional
 import math
 import cv2
 import os
@@ -283,10 +283,9 @@ class HighwayDataCollector:
                 return 2
         return 0
 
-
 def load_or_collect_trajectories(
     file_path: str,
-    collector: HighwayDataCollector | None = None,
+    collector: Optional[HighwayDataCollector] = None,
     n_aggressive: int = 20,
     n_cautious: int = 20,
     n_normal: int = 20,

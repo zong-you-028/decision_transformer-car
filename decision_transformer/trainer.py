@@ -29,7 +29,7 @@ class DecisionTransformerTrainer:
         self.eval_results = []
         
         # Setup for visualization
-        plt.style.use('seaborn-v0_8')
+        plt.style.use('seaborn')
         self.fig = None
         self.axes = None
         

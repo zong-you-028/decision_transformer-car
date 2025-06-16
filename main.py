@@ -28,6 +28,7 @@ from decision_transformer.evaluator import HighwayEvaluator
 def main():
     """Main training and evaluation pipeline"""
     
+    data_file = "highway_trajectories.pkl"  # Specify your data file path here
     all_trajectories = load_or_collect_trajectories(data_file)
     dataset = HighwayDataset(all_trajectories, max_len=20)
     
@@ -49,7 +50,7 @@ def main():
     trainer = DecisionTransformerTrainer(model)
     train_losses = trainer.train(
         dataset,
-        num_epochs=100,
+        num_epochs=20,
         batch_size=32,
         record_animation=True,
         animation_file="training_animation.mp4",
