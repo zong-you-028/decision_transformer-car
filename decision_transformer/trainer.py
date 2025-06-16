@@ -328,6 +328,11 @@ class DecisionTransformerTrainer:
             fig, update, frames=len(self.record_frames), interval=200, blit=False
         )
 
+        if 'ffmpeg' not in animation.writers.list():
+            print('ffmpeg writer not available, skipping animation save.')
+            plt.close(fig)
+            return
+
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=5, metadata=dict(artist='Decision Transformer'), bitrate=1800)
         anim.save(filename, writer=writer)
