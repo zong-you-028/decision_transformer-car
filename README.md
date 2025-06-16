@@ -16,8 +16,9 @@ The data collector now supports three driving styles:
 - **cautious** – keeps lower speeds and avoids risky moves
 - **normal** – a balanced heuristic
 
-After training, an animation of the training environment is saved as
-`training_animation.mp4`.
+After training, a plot comparing the three driving styles is saved as
+`style_analysis.png`. An animation of the evaluation episodes is also
+generated as `decision_transformer_highway.mp4`.
 
 Collected trajectories are stored in `highway_trajectories.pkl`. If this
 file already exists, the main script will load it instead of collecting
