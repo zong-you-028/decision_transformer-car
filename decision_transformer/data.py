@@ -278,8 +278,31 @@ class HighwayDataCollector:
 
         if speed > 20:
             return 2  # SLOWER
+
         for i in range(1, len(obs)):
             if obs[i][0] and obs[i][1] > x and abs(obs[i][2]-y) < 2 and obs[i][1]-x < 15:
                 return 2
         return 0
+
+
+def load_or_collect_trajectories(
+    file_path: str = "highway_trajectories.pkl",
+    num_trajs_per_style: int = 20,
+) -> list:
+    """Load cached trajectories if available, otherwise collect and save them."""
+    if os.path.exists(file_path):
+        print(f"Loading trajectories from {file_path}...")
+        with open(file_path, "rb") as f:
+            return pickle.load(f)
+
+    print("Collecting trajectories...")
+    collector = HighwayDataCollector()
+    aggressive = collector.collect_aggressive_trajectories(num_trajs_per_style)
+    cautious = collector.collect_cautious_trajectories(num_trajs_per_style)
+    normal = collector.collect_expert_trajectories(num_trajs_per_style)
+    trajectories = aggressive + cautious + normal
+
+    with open(file_path, "wb") as f:
+        pickle.dump(trajectories, f)
+    return trajectories
 

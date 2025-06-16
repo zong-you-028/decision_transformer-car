@@ -262,6 +262,11 @@ class HighwayEvaluator:
         
         # Save animation
         print(f"Saving animation to {filename}...")
+        if 'ffmpeg' not in animation.writers.list():
+            print('ffmpeg writer not available, skipping animation save.')
+            plt.close()
+            return
+
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=5, metadata=dict(artist='Decision Transformer'), bitrate=1800)
         anim.save(filename, writer=writer)
